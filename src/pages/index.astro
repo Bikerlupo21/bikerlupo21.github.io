@@ -1,15 +1,18 @@
 ---
 import Base from '../layouts/Base.astro';
 import Scheda from '../components/Scheda.astro';
-import { articoli, puntate, motore, progetti, brand, GRUPPI_MOTORE, RUBRICHE, fmtData } from '../lib/dati';
+import { articoli, puntate, motore, progetti, brand, GRUPPI_MOTORE, fmtData, info } from '../lib/dati';
 
 const tuttiArticoli = await articoli();
 const tuttePuntate = await puntate();
 const tuttiMotore = await motore();
 const ultimi = [...tuttiArticoli, ...tuttePuntate, ...tuttiMotore]
   .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
-const inEvidenza = tuttiArticoli.find((a) => a.data.rubrica === 'dal-video') ?? tuttiArticoli[0];
-const altri = ultimi.filter((v) => v !== inEvidenza).slice(0, 3);
+// In evidenza: il contenuto più recente, di qualsiasi rubrica
+const inEvidenza = ultimi[0];
+const ev = inEvidenza ? info(inEvidenza) : null;
+const evYoutube = inEvidenza && 'youtube' in inEvidenza.data ? inEvidenza.data.youtube : undefined;
+const altri = ultimi.slice(1, 4);
 const progetto = (await progetti()).find((p) => p.data.stato === 'in-corso');
 const puntateProgetto = progetto ? tuttePuntate.filter((p) => p.data.progetto === progetto.id) : [];
 const fatte = puntateProgetto.length;
@@ -21,29 +24,32 @@ const componenti = GRUPPI_MOTORE.flatMap((g) => g.componenti).slice(0, 12);
     <section class="scuro eroe">
       <div class="wrap eroe-in">
         <div class="eroe-testo">
-          <span class="tag celeste">Ultimo articolo · {RUBRICHE[inEvidenza.data.rubrica]}</span>
+          <span class="tag celeste">Ultimo articolo · {ev!.tag}</span>
           <h1 class="stroke">{inEvidenza.data.titolo}</h1>
           <p class="lead">{inEvidenza.data.descrizione}</p>
           <p class="muted" style="color: #bdbdbd">Gabriele · Bikerlupo — {fmtData(inEvidenza.data.data)}</p>
           <div style="display: flex; flex-wrap: wrap; gap: 12px">
-            <a class="btn primario" href={`/articoli/${inEvidenza.id}/`}>Leggi l'articolo</a>
-            {inEvidenza.data.youtube && <a class="btn vuoto" href={`https://www.youtube.com/watch?v=${inEvidenza.data.youtube}`}>Guarda il video</a>}
+            <a class="btn primario" href={ev!.href}>Leggi l'articolo</a>
+            {evYoutube && <a class="btn vuoto" href={`https://www.youtube.com/watch?v=${evYoutube}`}>Guarda il video</a>}
           </div>
         </div>
         <div class="eroe-media">
-          {inEvidenza.data.youtube
-            ? <img src={`https://i.ytimg.com/vi/${inEvidenza.data.youtube}/hqdefault.jpg`} alt="" loading="eager" />
-            : inEvidenza.data.copertina
-              ? <img src={inEvidenza.data.copertina} alt="" />
-              : <div class="foto-vuota" style="aspect-ratio: 16/9; background: #262626; color: #d0d0d0; border-color: #fff">copertina in arrivo</div>}
+          {inEvidenza.data.copertina
+            ? <img src={inEvidenza.data.copertina} alt="" loading="eager" />
+            : evYoutube
+              ? <img src={`https://i.ytimg.com/vi/${evYoutube}/hqdefault.jpg`} alt="" loading="eager" />
+              : <img src="/img/motore/motore-completo.png" alt="" loading="eager" />}
         </div>
       </div>
     </section>
   ) : (
     <section class="scuro eroe">
-      <div class="wrap eroe-testo">
-        <h1 class="stroke">Il blog di <span style="color: var(--celeste)">Bikerlupo</span></h1>
-        <p class="lead">Articoli dai video, prove su strada, progetti in garage e il motore spiegato pezzo per pezzo. I primi articoli arrivano a breve.</p>
+      <div class="wrap eroe-in">
+        <div class="eroe-testo">
+          <h1 class="stroke">Il blog di <span style="color: var(--celeste)">Bikerlupo</span></h1>
+          <p class="lead">Articoli dai video, prove su strada, progetti in garage e il motore spiegato pezzo per pezzo.</p>
+        </div>
+        <div class="eroe-media"><img src="/img/motore/motore-completo.png" alt="" loading="eager" /></div>
       </div>
     </section>
   )}

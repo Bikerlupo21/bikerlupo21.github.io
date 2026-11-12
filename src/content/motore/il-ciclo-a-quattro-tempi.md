@@ -6,6 +6,7 @@ gruppo: basi
 ordine: 1
 verificatoIl: 2026-11-12
 bozza: false
+copertina: /img/motore/motore-completo.png
 inBreve:
   - "Quattro corse del pistone: aspirazione, compressione, espansione, scarico."
   - "Ogni corsa vale mezzo giro dell'albero motore: un ciclo completo sono due giri (720°)."
