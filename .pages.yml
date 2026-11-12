@@ -181,7 +181,7 @@ content:
         label: Categoria
         type: select
         required: true
-        options: { values: [Abbigliamento, Accessori, Ricambi, Pneumatici, Moto, Elettronica] }
+        options: { values: [Abbigliamento, Accessori, Ricambi, Pneumatici, Moto, Elettronica, Caschi, Pista, Community] }
       - { name: giudizio, label: Il mio giudizio in una riga, type: string }
       - { name: miPiace, label: Mi piace, type: string }
       - { name: nonMiPiace, label: Non mi piace, type: string }

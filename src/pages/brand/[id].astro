@@ -59,7 +59,10 @@ const d = b.data;
   </section>
 </Base>
 <style>
+  .intro { display: flex; flex-direction: column; gap: 14px; }
   .intro :global(p) { margin: 0; font-size: 17px; line-height: 1.65; color: #e0e0e0; }
+  .intro :global(a) { color: #fff; }
+  .intro :global(img) { width: 100%; height: auto; border-radius: 10px; display: block; }
   .breve { flex: 1 1 380px; background: #fff; color: var(--testo); border-radius: 12px; padding: 26px; display: flex; flex-direction: column; gap: 14px; }
   .voce { flex: 1 1 140px; display: flex; flex-direction: column; gap: 6px; }
   .voce span { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--grigio); }

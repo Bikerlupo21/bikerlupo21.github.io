@@ -99,7 +99,7 @@ const brand = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/brand' }),
   schema: z.object({
     nome: z.string(),
-    categoria: z.enum(['Abbigliamento', 'Accessori', 'Ricambi', 'Pneumatici', 'Moto', 'Elettronica']),
+    categoria: z.enum(['Abbigliamento', 'Accessori', 'Ricambi', 'Pneumatici', 'Moto', 'Elettronica', 'Caschi', 'Pista', 'Community']),
     giudizio: opz(z.string()),
     miPiace: opz(z.string()),
     nonMiPiace: opz(z.string()),
