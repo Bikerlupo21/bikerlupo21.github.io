@@ -1,0 +1,191 @@
+# Pannello di scrittura Pages CMS (https://app.pagescms.org)
+media:
+  input: public/img
+  output: /img
+  categories: [image]
+
+content:
+  - name: articoli
+    label: Articoli (Dal video / Provato da me)
+    type: collection
+    path: src/content/articoli
+    filename: "{fields.titolo}.md"
+    view:
+      primary: titolo
+      fields: [titolo, rubrica, data, bozza]
+      sort: [data]
+    fields:
+      - { name: titolo, label: Titolo, type: string, required: true }
+      - { name: descrizione, label: Descrizione breve (anteprima e Google), type: text, required: true }
+      - { name: data, label: Data, type: date, required: true }
+      - name: rubrica
+        label: Rubrica
+        type: select
+        required: true
+        options:
+          values:
+            - { name: dal-video, label: Dal video }
+            - { name: provato-da-me, label: Provato da me }
+      - { name: bozza, label: "Bozza (non pubblicare ancora)", type: boolean, default: true }
+      - { name: copertina, label: Foto di copertina, type: image }
+      - { name: youtube, label: "ID video YouTube (la parte dopo watch?v=)", type: string }
+      - name: capitoli
+        label: Capitoli del video
+        type: object
+        list: true
+        fields:
+          - { name: tempo, label: "Tempo (es. 2:30)", type: string }
+          - { name: titolo, label: Titolo capitolo, type: string }
+      - name: brand
+        label: Brand citati
+        type: reference
+        options: { collection: brand, multiple: true, search: nome, label: "{nome}" }
+      - name: pezzi
+        label: Pezzi, costi e link
+        type: object
+        list: true
+        fields:
+          - { name: cosa, label: Cosa, type: string }
+          - { name: brand, label: Brand, type: string }
+          - { name: costo, label: "Costo (es. 49 €)", type: string }
+          - { name: link, label: Link, type: string }
+      - { name: totale, label: Totale, type: string }
+      - { name: voto, label: "Voto (solo Provato da me, es. 8/10)", type: string }
+      - { name: pro, label: Pro, type: string, list: true }
+      - { name: contro, label: Contro, type: string, list: true }
+      - { name: body, label: Testo dell'articolo, type: rich-text, options: { format: markdown, path: public/img/articoli } }
+
+  - name: progetti
+    label: Progetti
+    type: collection
+    path: src/content/progetti
+    filename: "{fields.titolo}.md"
+    view: { primary: titolo, fields: [titolo, stato, bozza] }
+    fields:
+      - { name: titolo, label: Titolo, type: string, required: true }
+      - { name: descrizione, label: Descrizione breve, type: text, required: true }
+      - { name: moto, label: Moto (modello e anno), type: string, required: true }
+      - { name: puntatePreviste, label: Puntate previste, type: number, required: true }
+      - name: stato
+        label: Stato
+        type: select
+        options: { values: [{ name: in-corso, label: In corso }, { name: concluso, label: Concluso }] }
+      - { name: spesaTotale, label: Spesa totale finora, type: string }
+      - { name: copertina, label: Foto, type: image }
+      - { name: data, label: Data di inizio, type: date, required: true }
+      - { name: bozza, label: "Bozza (non pubblicare ancora)", type: boolean, default: true }
+      - { name: body, label: Racconto del progetto, type: rich-text, options: { format: markdown, path: public/img/progetti } }
+
+  - name: puntate
+    label: Puntate dei progetti
+    type: collection
+    path: src/content/puntate
+    filename: "{fields.titolo}.md"
+    view: { primary: titolo, fields: [titolo, numero, data, bozza], sort: [data] }
+    fields:
+      - name: progetto
+        label: Progetto
+        type: reference
+        required: true
+        options: { collection: progetti, search: titolo, label: "{titolo}" }
+      - { name: numero, label: Numero puntata, type: number, required: true }
+      - { name: titolo, label: Titolo, type: string, required: true }
+      - { name: descrizione, label: Descrizione breve, type: text, required: true }
+      - { name: data, label: Data, type: date, required: true }
+      - { name: bozza, label: "Bozza (non pubblicare ancora)", type: boolean, default: true }
+      - { name: copertina, label: Foto di copertina, type: image }
+      - { name: youtube, label: ID video YouTube, type: string }
+      - { name: tempo, label: "Tempo impiegato (es. 3 h)", type: string }
+      - { name: costo, label: Costo della puntata, type: string }
+      - { name: difficolta, label: Difficoltà (1-5), type: number }
+      - name: brand
+        label: Brand citati
+        type: reference
+        options: { collection: brand, multiple: true, search: nome, label: "{nome}" }
+      - name: ricambi
+        label: Ricambi usati
+        type: object
+        list: true
+        fields:
+          - { name: cosa, label: Cosa, type: string }
+          - { name: brand, label: Brand, type: string }
+          - { name: costo, label: Costo, type: string }
+          - { name: link, label: Link, type: string }
+      - { name: body, label: Testo della puntata, type: rich-text, options: { format: markdown, path: public/img/progetti } }
+
+  - name: motore
+    label: Il motore (articoli verificati)
+    type: collection
+    path: src/content/motore
+    filename: "{fields.titolo}.md"
+    view: { primary: titolo, fields: [titolo, gruppo, verificatoIl, bozza] }
+    fields:
+      - { name: titolo, label: Titolo, type: string, required: true }
+      - { name: descrizione, label: Descrizione breve, type: text, required: true }
+      - { name: data, label: Data di pubblicazione, type: date, required: true }
+      - name: gruppo
+        label: Gruppo
+        type: select
+        required: true
+        options:
+          values:
+            - { name: basi, label: Le basi }
+            - { name: manovellismo, label: Manovellismo }
+            - { name: distribuzione, label: Distribuzione }
+            - { name: alimentazione, label: Alimentazione }
+            - { name: accensione, label: Accensione }
+            - { name: lubrificazione-raffreddamento, label: Lubrificazione e raffreddamento }
+            - { name: trasmissione, label: Trasmissione }
+            - { name: scarico, label: Scarico }
+      - { name: ordine, label: Ordine nella mappa, type: number, required: true }
+      - { name: verificatoIl, label: Verificato il, type: date, required: true }
+      - { name: bozza, label: "Bozza (non pubblicare ancora)", type: boolean, default: true }
+      - { name: inBreve, label: In breve (punti), type: string, list: { min: 1 } }
+      - name: glossario
+        label: Glossario
+        type: object
+        list: true
+        fields:
+          - { name: termine, label: Termine, type: string }
+          - { name: definizione, label: Definizione, type: text }
+      - name: fonti
+        label: "Fonti (almeno 2, obbligatorie)"
+        type: object
+        list: { min: 2 }
+        fields:
+          - { name: testo, label: "Fonte (autore, titolo, editore, pagine)", type: string, required: true }
+          - { name: link, label: Link, type: string }
+      - name: correzioni
+        label: Correzioni
+        type: object
+        list: true
+        fields:
+          - { name: data, label: Data, type: date }
+          - { name: testo, label: Cosa è stato corretto, type: text }
+      - name: brand
+        label: Brand citati
+        type: reference
+        options: { collection: brand, multiple: true, search: nome, label: "{nome}" }
+      - { name: youtube, label: ID video YouTube, type: string }
+      - { name: body, label: Testo, type: rich-text, options: { format: markdown, path: public/img/motore } }
+
+  - name: brand
+    label: Brand
+    type: collection
+    path: src/content/brand
+    filename: "{fields.nome}.md"
+    view: { primary: nome, fields: [nome, categoria, bozza] }
+    fields:
+      - { name: nome, label: Nome, type: string, required: true }
+      - name: categoria
+        label: Categoria
+        type: select
+        required: true
+        options: { values: [Abbigliamento, Accessori, Ricambi, Pneumatici, Moto, Elettronica] }
+      - { name: giudizio, label: Il mio giudizio in una riga, type: string }
+      - { name: miPiace, label: Mi piace, type: string }
+      - { name: nonMiPiace, label: Non mi piace, type: string }
+      - { name: provato, label: Cosa ho provato, type: string, list: true }
+      - { name: sito, label: Sito ufficiale, type: string }
+      - { name: bozza, label: "Bozza (non pubblicare ancora)", type: boolean, default: true }
+      - { name: body, label: Chi è il brand (2 righe), type: rich-text, options: { format: markdown } }

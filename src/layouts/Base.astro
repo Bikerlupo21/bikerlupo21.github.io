@@ -1,0 +1,102 @@
+---
+import '@fontsource/montserrat/500.css';
+import '@fontsource/montserrat/600.css';
+import '@fontsource/montserrat/700.css';
+import '@fontsource/montserrat/800.css';
+import '@fontsource/montserrat/900.css';
+import '@fontsource/caveat/700.css';
+import '../styles/global.css';
+import { SITO } from '../lib/sito';
+
+interface Props {
+  titolo: string;
+  descrizione?: string;
+  attivo?: string;
+  immagine?: string;
+}
+const { titolo, descrizione = SITO.descrizione, attivo = '', immagine = '/img/bl21-logo-a.png' } = Astro.props;
+const titoloPagina = titolo === SITO.nome ? titolo : `${titolo} · ${SITO.nome}`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const menu = [
+  { href: '/dal-video/', label: 'Dal video', id: 'dal-video' },
+  { href: '/provato-da-me/', label: 'Provato da me', id: 'provato-da-me' },
+  { href: '/progetti/', label: 'Progetti', id: 'progetti' },
+  { href: '/motore/', label: 'Il motore', id: 'motore' },
+  { href: '/brand/', label: 'Brand', id: 'brand' },
+  { href: '/chi-sono/', label: 'Chi sono', id: 'chi-sono' },
+];
+---
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{titoloPagina}</title>
+  <meta name="description" content={descrizione} />
+  <link rel="canonical" href={canonical} />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="alternate" type="application/rss+xml" title={SITO.nome} href="/rss.xml" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content={titoloPagina} />
+  <meta property="og:description" content={descrizione} />
+  <meta property="og:image" content={new URL(immagine, Astro.site)} />
+  <meta property="og:locale" content="it_IT" />
+  <meta name="twitter:card" content="summary_large_image" />
+</head>
+<body>
+  <a href="#contenuto" class="salta">Vai al contenuto</a>
+  <header class="testata">
+    <div class="wrap testata-in">
+      <a href="/" class="marchio" aria-label="Bikerlupo, home">
+        <img src="/img/bl21-logo-a-small.png" alt="" width="117" height="54" />
+        <span>BIKERLUPO</span>
+      </a>
+      <nav class="menu" aria-label="Menu principale">
+        {menu.map((m) => (
+          <a href={m.href} aria-current={attivo === m.id ? 'page' : undefined}>{m.label}</a>
+        ))}
+      </nav>
+    </div>
+  </header>
+
+  <main id="contenuto"><slot /></main>
+
+  <footer class="scuro piede">
+    <div class="wrap piede-in">
+      <div class="piede-chi">
+        <img src="/img/bl21-logo-a.png" alt="BL21 Bikerlupo" width="208" height="96" />
+        <p>Sono Gabriele. Giro, provo, smonto e racconto: a voce su YouTube, per iscritto qui. Da motociclista a motociclista.</p>
+        <span class="hand firma">Gabriele · Bikerlupo</span>
+      </div>
+      <nav aria-label="Social" class="social">
+        {SITO.social.map((s) => <a href={s.href} rel="me noopener" target="_blank">{s.nome}</a>)}
+        <a href="/rss.xml">RSS</a>
+      </nav>
+    </div>
+  </footer>
+</body>
+</html>
+
+<style>
+  .salta { position: absolute; left: -9999px; }
+  .salta:focus { left: 16px; top: 16px; background: var(--celeste); padding: 10px 16px; z-index: 10; font-weight: 800; }
+  .testata { border-bottom: 3px solid var(--testo); background: #fff; }
+  .testata-in { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; padding-bottom: 16px; }
+  .marchio { display: flex; align-items: center; gap: 14px; text-decoration: none; min-height: 44px; }
+  .marchio img { height: 54px; width: auto; display: block; }
+  .marchio span { font-weight: 900; font-size: 18px; letter-spacing: .04em; color: var(--nero); }
+  .menu { display: flex; flex-wrap: wrap; }
+  .menu a { font-weight: 800; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; text-decoration: none; padding: 14px 12px; }
+  .menu a:hover { background: var(--celeste-velo); }
+  .menu a[aria-current='page'] { background: var(--celeste); }
+  .piede { padding: 56px 0; }
+  .piede-in { display: flex; flex-wrap: wrap; gap: 40px; justify-content: space-between; align-items: flex-start; }
+  .piede-chi { flex: 1 1 360px; display: flex; flex-direction: column; gap: 16px; }
+  .piede-chi img { height: 96px; width: auto; align-self: flex-start; }
+  .piede-chi p { margin: 0; line-height: 1.6; color: #d6d6d6; max-width: 440px; }
+  .firma { font-size: 26px; color: var(--celeste); }
+  .social { display: flex; flex-direction: column; gap: 4px; }
+  .social a { color: #fff; font-weight: 800; text-transform: uppercase; min-height: 44px; display: flex; align-items: center; text-decoration: none; }
+  .social a:hover { color: var(--celeste); }
+</style>

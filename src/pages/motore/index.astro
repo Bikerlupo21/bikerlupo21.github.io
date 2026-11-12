@@ -1,0 +1,69 @@
+---
+import Base from '../../layouts/Base.astro';
+import { motore, GRUPPI_MOTORE } from '../../lib/dati';
+const articoli = await motore();
+const gruppi = GRUPPI_MOTORE.map((g, i) => {
+  const pubblicati = articoli.filter((a) => a.data.gruppo === g.id);
+  const titoli = new Set(pubblicati.map((a) => a.data.titolo.toLowerCase()));
+  return {
+    n: i + 1,
+    nome: g.nome,
+    pubblicati,
+    // componenti previsti che non hanno ancora un articolo con lo stesso titolo
+    inArrivo: g.componenti.filter((c) => !titoli.has(c.toLowerCase())),
+  };
+});
+---
+<Base titolo="Il motore, pezzo per pezzo" descrizione="Come funziona il motore della moto, un componente alla volta. Ogni articolo verificato su fonti tecniche." attivo="motore">
+  <section class="scuro" style="padding: 56px 0">
+    <div class="wrap" style="display: flex; flex-wrap: wrap; gap: 40px; align-items: center">
+      <div style="flex: 1 1 520px; display: flex; flex-direction: column; gap: 18px; align-items: flex-start">
+        <span class="tag celeste">Il motore</span>
+        <h1 class="stroke" style="font-size: clamp(38px, 6vw, 58px)">Il motore, <span style="color: var(--celeste)">pezzo per pezzo</span></h1>
+        <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #dadada; max-width: 600px">Come funziona davvero quello che hai sotto il serbatoio. Un componente alla volta, spiegato semplice, con ogni dato controllato su fonti tecniche.</p>
+        <span class="hand" style="font-size: 26px; color: var(--celeste-chiaro)">se non è verificato, qui non ci finisce</span>
+      </div>
+      <div class="metodo">
+        <h2 style="font-size: 20px; color: var(--nero)">Come verifico ogni articolo</h2>
+        <ol>
+          <li>Solo fonti tecniche: manuali d'officina, testi di ingegneria motoristica, documentazione dei costruttori.</li>
+          <li>Ogni dato ha la sua fonte, e almeno due fonti che concordano.</li>
+          <li>Se le fonti non concordano, lo scrivo invece di scegliere io.</li>
+          <li>Data di verifica in alto e correzioni pubbliche in fondo.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding: 64px 0 80px">
+    <div class="wrap" style="display: flex; flex-direction: column; gap: 28px">
+      <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px">
+        <h2 style="font-size: 36px">La <span class="hi">mappa</span> del motore</h2>
+        <span class="hand" style="font-size: 24px; color: #555">parti dalle basi o salta al pezzo che ti interessa</span>
+      </div>
+      <div class="mappa">
+        {gruppi.map((g) => (
+          <div class="grp">
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 4px">
+              <span class="gnum">{g.n}</span><h3 style="font-size: 18px">{g.nome}</h3>
+            </div>
+            {g.pubblicati.map((a) => <a class="comp" href={`/motore/${a.id}/`}><span>{a.data.titolo}</span><span class="on">Leggi</span></a>)}
+            {g.inArrivo.map((c) => <span class="comp off-row"><span>{c}</span><span class="off">In arrivo</span></span>)}
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>
+<style>
+  .metodo { flex: 1 1 340px; background: #fff; color: var(--nero); border: 3px solid var(--celeste); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 14px; }
+  .metodo ol { margin: 0; padding-left: 22px; line-height: 1.6; font-weight: 600; display: flex; flex-direction: column; gap: 6px; }
+  .mappa { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 22px; }
+  .grp { background: #fff; border: 3px solid var(--nero); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 4px; box-shadow: 5px 5px 0 var(--celeste); }
+  .gnum { width: 32px; height: 32px; border-radius: 50%; background: var(--celeste); border: 2px solid var(--nero); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 14px; flex: none; }
+  .comp { display: flex; justify-content: space-between; align-items: center; gap: 10px; min-height: 44px; padding: 0 8px; border-bottom: 1px solid #e2e2e2; text-decoration: none; font-weight: 700; }
+  a.comp:hover { background: var(--celeste-velo); }
+  .off-row { color: var(--grigio); font-weight: 600; }
+  .on { font-size: 11px; font-weight: 900; text-transform: uppercase; letter-spacing: .06em; background: var(--celeste); color: var(--nero); padding: 4px 8px; border-radius: 4px; flex: none; }
+  .off { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; flex: none; }
+</style>

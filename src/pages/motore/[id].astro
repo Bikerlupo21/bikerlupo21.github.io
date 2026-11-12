@@ -1,0 +1,89 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import BrandCitati from '../../components/BrandCitati.astro';
+import { motore, GRUPPI_MOTORE, fmtData, minLettura } from '../../lib/dati';
+
+export async function getStaticPaths() {
+  const tutti = await motore();
+  return tutti.map((a) => ({ params: { id: a.id }, props: { a, tutti } }));
+}
+const { a, tutti } = Astro.props;
+const { Content } = await render(a);
+const d = a.data;
+const gruppo = GRUPPI_MOTORE.find((g) => g.id === d.gruppo)!;
+const serie = tutti.filter((x) => x.data.gruppo === d.gruppo);
+const i = tutti.findIndex((x) => x.id === a.id);
+const dopo = tutti[i + 1];
+---
+<Base titolo={d.titolo} descrizione={d.descrizione} attivo="motore" immagine={d.copertina}>
+  <div class="wrap colonne" style="padding-top: 40px; padding-bottom: 80px">
+    <article class="principale prosa">
+      <nav aria-label="Percorso" class="muted"><a href="/motore/">Il motore</a> / {gruppo.nome} / {d.titolo}</nav>
+      <span class="tag">Il motore · {gruppo.nome}</span>
+      <h1 style="font-size: clamp(34px, 5.5vw, 50px)">{d.titolo}</h1>
+      <div style="display: flex; flex-wrap: wrap; gap: 10px; align-items: center">
+        <span class="badge">
+          <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"></path></svg>
+          Verificato il {fmtData(d.verificatoIl)} · {d.fonti.length} fonti
+        </span>
+        <span class="muted">Gabriele · Bikerlupo · {minLettura(a.body)} min di lettura</span>
+      </div>
+
+      <div class="box" style="background: var(--celeste-velo)">
+        <h2 style="font-size: 18px; margin: 0">In breve</h2>
+        <ul style="margin: 0; padding-left: 20px; font-weight: 600">{d.inBreve.map((x) => <li>{x}</li>)}</ul>
+      </div>
+
+      <Content />
+
+      {d.glossario.length > 0 && (
+        <section style="display: flex; flex-direction: column; gap: 12px">
+          <h2>Glossario</h2>
+          <dl class="glossario">{d.glossario.map((g) => <><dt>{g.termine}</dt><dd>{g.definizione}</dd></>)}</dl>
+        </section>
+      )}
+
+      <section class="fonti">
+        <h2 style="font-size: 22px; margin: 0">Fonti</h2>
+        <ol>{d.fonti.map((f) => <li>{f.link ? <a href={f.link} rel="noopener" target="_blank">{f.testo}</a> : f.testo}</li>)}</ol>
+        <h2 style="font-size: 18px; margin: 8px 0 0">Correzioni</h2>
+        {d.correzioni.length > 0
+          ? <ul>{d.correzioni.map((c) => <li><b>{fmtData(c.data)}</b> — {c.testo}</li>)}</ul>
+          : <p class="muted" style="font-size: 16px !important">Nessuna correzione finora. Hai trovato un errore? Scrivimi: lo verifico, correggo e lo segno qui con la data.</p>}
+      </section>
+
+      <nav aria-label="Articoli della serie" style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between">
+        <a class="btn" href="/motore/">← Mappa del motore</a>
+        {dopo && <a class="btn primario" href={`/motore/${dopo.id}/`}>Prossimo: {dopo.data.titolo} →</a>}
+      </nav>
+    </article>
+    <aside class="laterale">
+      <div class="box">
+        <h2 style="font-size: 16px">In questa serie: {gruppo.nome}</h2>
+        {serie.map((s) => (
+          <a href={`/motore/${s.id}/`} aria-current={s.id === a.id ? 'page' : undefined} class="serie">{s.data.titolo}</a>
+        ))}
+      </div>
+      {d.youtube && (
+        <div class="scuro box" style="border-color: var(--nero)">
+          <h2 style="font-size: 16px">Lo vedi anche in video</h2>
+          <a class="btn primario" style="align-self: flex-start" href={`https://www.youtube.com/watch?v=${d.youtube}`}>Guarda</a>
+        </div>
+      )}
+      <BrandCitati brand={d.brand} />
+    </aside>
+  </div>
+</Base>
+<style>
+  .badge { display: inline-flex; align-items: center; gap: 8px; background: var(--nero); color: #fff; font-weight: 800; font-size: 14px; padding: 8px 14px; border-radius: 999px; }
+  .glossario { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 10px 18px; font-size: 17px; line-height: 1.6; }
+  .glossario dt { font-weight: 900; }
+  .glossario dd { margin: 0; }
+  .fonti { border-top: 3px solid var(--nero); padding-top: 20px; display: flex; flex-direction: column; gap: 12px; }
+  .fonti ol, .fonti ul { margin: 0; padding-left: 22px; }
+  .fonti li { font-size: 16px; }
+  .serie { font-weight: 700; min-height: 44px; display: flex; align-items: center; padding: 0 10px; border-radius: 6px; text-decoration: none; }
+  .serie:hover { background: var(--celeste-velo); }
+  .serie[aria-current='page'] { background: var(--celeste-velo); font-weight: 900; }
+</style>

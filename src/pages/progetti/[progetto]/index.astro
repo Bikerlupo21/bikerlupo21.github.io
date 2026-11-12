@@ -1,0 +1,27 @@
+---
+import { render } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import TestataProgetto from '../../../components/TestataProgetto.astro';
+import ElencoPuntate from '../../../components/ElencoPuntate.astro';
+import { progetti, puntate } from '../../../lib/dati';
+
+export async function getStaticPaths() {
+  const tutte = await puntate();
+  return (await progetti()).map((p) => ({
+    params: { progetto: p.id },
+    props: { p, lista: tutte.filter((x) => x.data.progetto === p.id).sort((a, b) => a.data.numero - b.data.numero) },
+  }));
+}
+const { p, lista } = Astro.props;
+const { Content } = await render(p);
+---
+<Base titolo={p.data.titolo} descrizione={p.data.descrizione} attivo="progetti" immagine={p.data.copertina}>
+  <TestataProgetto progetto={p} fatte={lista.length} />
+  <div class="wrap colonne" style="padding-top: 48px; padding-bottom: 80px">
+    <article class="principale prosa">
+      <Content />
+      {lista[0] && <a class="btn primario" style="align-self: flex-start" href={`/progetti/${p.id}/${lista[0].id}/`}>Parti dalla puntata 1 →</a>}
+    </article>
+    <aside class="laterale"><ElencoPuntate progetto={p} puntate={lista} /></aside>
+  </div>
+</Base>

@@ -1,0 +1,21 @@
+---
+import Base from '../layouts/Base.astro';
+import { SITO } from '../lib/sito';
+---
+<Base titolo="Chi sono" attivo="chi-sono">
+  <div class="wrap colonne" style="padding-top: 48px; padding-bottom: 80px">
+    <article class="principale prosa">
+      <h1 style="font-size: clamp(38px, 6vw, 56px)">Chi <span class="hi">sono</span></h1>
+      <p>Sono Gabriele, e dietro Bikerlupo ci sono io. Giro, provo, smonto e racconto: a voce nei video su YouTube, per iscritto qui sul blog.</p>
+      <p>[Racconta qui la tua storia: da quando vai in moto, che moto hai, cosa ti piace fare in sella e in garage.]</p>
+      <blockquote><p>BL21 è il mio logo e la mia firma: BL sta per Bikerlupo.</p></blockquote>
+      <h2>Dove trovarmi</h2>
+      <div style="display: flex; flex-wrap: wrap; gap: 12px">
+        {SITO.social.map((s) => <a class="chip" href={s.href} rel="me noopener" target="_blank">{s.nome}</a>)}
+      </div>
+    </article>
+    <aside class="laterale">
+      <img src="/img/bl21-logo-a.png" alt="BL21 Bikerlupo" width="400" height="185" style="max-width: 320px" />
+    </aside>
+  </div>
+</Base>

@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import { brand, articoli, puntate, motore } from '../../lib/dati';
+const lista = await brand();
+const voci = [...(await articoli()), ...(await puntate()), ...(await motore())];
+const conta = (id: string) => voci.filter((v) => v.data.brand.includes(id)).length;
+const categorie = [...new Set(lista.map((b) => b.data.categoria))].sort();
+---
+<Base titolo="Brand" descrizione="I marchi che ho provato, montato o visto da vicino: cosa ne penso e dove ne parlo." attivo="brand">
+  <div class="wrap" style="padding-top: 48px; padding-bottom: 80px; display: flex; flex-direction: column; gap: 28px">
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 760px">
+      <h1 style="font-size: clamp(38px, 6vw, 56px)">I <span class="hi">brand</span></h1>
+      <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #444">I marchi che ho provato, montato o visto da vicino. Per ognuno: cosa ne penso e tutti gli articoli, i test e i progetti in cui ne parlo.</p>
+    </div>
+    {lista.length === 0 && <p class="hand" style="font-size: 28px">le prime schede arrivano presto</p>}
+    {categorie.length > 1 && (
+      <div role="group" aria-label="Filtra per categoria" class="filtri">
+        <button class="chip" type="button" data-cat="" aria-pressed="true">Tutti</button>
+        {categorie.map((c) => <button class="chip" type="button" data-cat={c} aria-pressed="false">{c}</button>)}
+      </div>
+    )}
+    <div class="brand-griglia">
+      {lista.map((b) => (
+        <a class="card" href={`/brand/${b.id}/`} data-categoria={b.data.categoria}>
+          <span class="tag">{b.data.categoria}</span>
+          <span class="nome">{b.data.nome}</span>
+          <span class="muted">{conta(b.id)} contenuti</span>
+        </a>
+      ))}
+    </div>
+  </div>
+</Base>
+<script>
+  const bottoni = document.querySelectorAll<HTMLButtonElement>('.filtri button');
+  bottoni.forEach((b) =>
+    b.addEventListener('click', () => {
+      bottoni.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      document.querySelectorAll<HTMLElement>('[data-categoria]').forEach((c) => {
+        c.hidden = !!b.dataset.cat && c.dataset.categoria !== b.dataset.cat;
+      });
+    }),
+  );
+</script>
+<style>
+  .filtri { display: flex; flex-wrap: wrap; gap: 10px; }
+  .filtri button { font-family: inherit; color: var(--testo); cursor: pointer; }
+  .filtri button[aria-pressed='true'] { background: var(--celeste); }
+  .brand-griglia { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 24px; }
+  .brand-griglia [hidden] { display: none; }
+  .nome { font-weight: 900; font-size: 22px; text-transform: uppercase; color: var(--nero); }
+</style>

@@ -1,0 +1,62 @@
+---
+import { render, getEntry } from 'astro:content';
+import Base from '../../../layouts/Base.astro';
+import TestataProgetto from '../../../components/TestataProgetto.astro';
+import ElencoPuntate from '../../../components/ElencoPuntate.astro';
+import Pezzi from '../../../components/Pezzi.astro';
+import BrandCitati from '../../../components/BrandCitati.astro';
+import { puntate, progetti, fmtData } from '../../../lib/dati';
+
+export async function getStaticPaths() {
+  const tutte = await puntate();
+  const ids = new Set((await progetti()).map((p) => p.id));
+  return tutte
+    .filter((x) => ids.has(x.data.progetto))
+    .map((x) => ({ params: { progetto: x.data.progetto, puntata: x.id }, props: { x } }));
+}
+const { x } = Astro.props;
+const progetto = (await getEntry('progetti', x.data.progetto))!;
+const lista = (await puntate()).filter((p) => p.data.progetto === progetto.id).sort((a, b) => a.data.numero - b.data.numero);
+const i = lista.findIndex((p) => p.id === x.id);
+const prima = lista[i - 1];
+const dopo = lista[i + 1];
+const { Content } = await render(x);
+const d = x.data;
+const stat = [
+  ['Tempo', d.tempo],
+  ['Costo puntata', d.costo],
+  ['Difficoltà', d.difficolta && `${d.difficolta} / 5`],
+  ['Spesa totale', progetto.data.spesaTotale],
+].filter(([, v]) => v);
+---
+<Base titolo={`${progetto.data.titolo} — Puntata ${d.numero}: ${d.titolo}`} descrizione={d.descrizione} attivo="progetti" immagine={d.copertina}>
+  <TestataProgetto progetto={progetto} fatte={lista.length} corrente={d.numero} />
+  <div class="wrap colonne" style="padding-top: 48px; padding-bottom: 80px">
+    <article class="principale prosa">
+      <header style="display: flex; flex-direction: column; gap: 10px">
+        <span class="hand" style="font-size: 28px">Puntata {d.numero}</span>
+        <h2 style="font-size: clamp(32px, 5vw, 44px); margin: 0">{d.titolo}</h2>
+        <p class="muted" style="font-size: 14px !important">Gabriele · Bikerlupo — {fmtData(d.data)}{d.youtube && <> · <a href={`https://www.youtube.com/watch?v=${d.youtube}`}>c'è anche il video →</a></>}</p>
+      </header>
+      {stat.length > 0 && (
+        <div class="stat">{stat.map(([k, v]) => <div><span>{k}</span><b>{v}</b></div>)}</div>
+      )}
+      <Content />
+      <Pezzi titolo="Ricambi usati in questa puntata" pezzi={d.ricambi} totale={d.costo} />
+      <nav aria-label="Puntata precedente e successiva" style="display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between">
+        {prima ? <a class="btn" href={`/progetti/${progetto.id}/${prima.id}/`}>← Puntata {prima.data.numero}</a> : <span></span>}
+        {dopo ? <a class="btn primario" href={`/progetti/${progetto.id}/${dopo.id}/`}>Puntata {dopo.data.numero} →</a> : <span class="hand" style="font-size: 22px">la prossima puntata arriva presto</span>}
+      </nav>
+    </article>
+    <aside class="laterale">
+      <ElencoPuntate progetto={progetto} puntate={lista} corrente={x.id} />
+      <BrandCitati brand={d.brand} />
+    </aside>
+  </div>
+</Base>
+<style>
+  .stat { display: flex; flex-wrap: wrap; gap: 14px; }
+  .stat div { flex: 1 1 150px; background: #fff; border: 3px solid var(--testo); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .stat span { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: var(--grigio); }
+  .stat b { font-size: 22px; font-weight: 900; }
+</style>

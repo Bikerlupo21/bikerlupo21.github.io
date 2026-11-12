@@ -1,0 +1,151 @@
+---
+import Base from '../layouts/Base.astro';
+import Scheda from '../components/Scheda.astro';
+import { articoli, puntate, motore, progetti, brand, GRUPPI_MOTORE, RUBRICHE, fmtData } from '../lib/dati';
+
+const tuttiArticoli = await articoli();
+const tuttePuntate = await puntate();
+const tuttiMotore = await motore();
+const ultimi = [...tuttiArticoli, ...tuttePuntate, ...tuttiMotore]
+  .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+const inEvidenza = tuttiArticoli.find((a) => a.data.rubrica === 'dal-video') ?? tuttiArticoli[0];
+const altri = ultimi.filter((v) => v !== inEvidenza).slice(0, 3);
+const progetto = (await progetti()).find((p) => p.data.stato === 'in-corso');
+const puntateProgetto = progetto ? tuttePuntate.filter((p) => p.data.progetto === progetto.id) : [];
+const fatte = puntateProgetto.length;
+const listaBrand = (await brand()).slice(0, 8);
+const componenti = GRUPPI_MOTORE.flatMap((g) => g.componenti).slice(0, 12);
+---
+<Base titolo="Bikerlupo">
+  {inEvidenza ? (
+    <section class="scuro eroe">
+      <div class="wrap eroe-in">
+        <div class="eroe-testo">
+          <span class="tag celeste">Ultimo articolo · {RUBRICHE[inEvidenza.data.rubrica]}</span>
+          <h1 class="stroke">{inEvidenza.data.titolo}</h1>
+          <p class="lead">{inEvidenza.data.descrizione}</p>
+          <p class="muted" style="color: #bdbdbd">Gabriele · Bikerlupo — {fmtData(inEvidenza.data.data)}</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px">
+            <a class="btn primario" href={`/articoli/${inEvidenza.id}/`}>Leggi l'articolo</a>
+            {inEvidenza.data.youtube && <a class="btn vuoto" href={`https://www.youtube.com/watch?v=${inEvidenza.data.youtube}`}>Guarda il video</a>}
+          </div>
+        </div>
+        <div class="eroe-media">
+          {inEvidenza.data.youtube
+            ? <img src={`https://i.ytimg.com/vi/${inEvidenza.data.youtube}/hqdefault.jpg`} alt="" loading="eager" />
+            : inEvidenza.data.copertina
+              ? <img src={inEvidenza.data.copertina} alt="" />
+              : <div class="foto-vuota" style="aspect-ratio: 16/9; background: #262626; color: #d0d0d0; border-color: #fff">copertina in arrivo</div>}
+        </div>
+      </div>
+    </section>
+  ) : (
+    <section class="scuro eroe">
+      <div class="wrap eroe-testo">
+        <h1 class="stroke">Il blog di <span style="color: var(--celeste)">Bikerlupo</span></h1>
+        <p class="lead">Articoli dai video, prove su strada, progetti in garage e il motore spiegato pezzo per pezzo. I primi articoli arrivano a breve.</p>
+      </div>
+    </section>
+  )}
+
+  <section class="sezione">
+    <div class="wrap colonna">
+      <div class="titolo-sez">
+        <h2>Le <span class="hi">rubriche</span></h2>
+        <span class="hand nota">cinque modi di raccontare la moto</span>
+      </div>
+      <div class="rubriche">
+        <a class="card" href="/dal-video/"><span class="tag">Dal video</span><h3>L'articolo dietro al video</h3><p>Ogni video lungo ha il suo articolo: stessa storia, per iscritto, con pezzi, costi e link.</p></a>
+        <a class="card" href="/provato-da-me/"><span class="tag">Provato da me</span><h3>Test senza video</h3><p>Accessori, abbigliamento e ricambi usati sul serio: pro, contro e giudizio finale.</p></a>
+        <a class="card" href="/progetti/"><span class="tag">Progetti</span><h3>Passo dopo passo</h3><p>I lavori in garage a puntate, con tempi, costi e ricambi di ogni fase.</p></a>
+        <a class="card" href="/motore/" style="background: var(--celeste-velo)"><span class="tag celeste">Il motore</span><h3>Come funziona</h3><p style="color: #3a3a3a">Il motore pezzo per pezzo. Ogni articolo verificato su fonti tecniche, con le fonti in fondo.</p></a>
+        <a class="card" href="/brand/"><span class="tag">Brand</span><h3>Una scheda per brand</h3><p>Cosa penso di ogni marchio e tutti gli articoli in cui ne parlo.</p></a>
+      </div>
+    </div>
+  </section>
+
+  {altri.length > 0 && (
+    <section class="sezione">
+      <div class="wrap colonna">
+        <div class="titolo-sez" style="justify-content: space-between">
+          <h2>Ultimi articoli</h2>
+          <a href="/articoli/" class="tutti">Tutti gli articoli →</a>
+        </div>
+        <div class="griglia">{altri.map((v) => <Scheda voce={v} />)}</div>
+      </div>
+    </section>
+  )}
+
+  {progetto && (
+    <section class="sezione">
+      <div class="wrap">
+        <div class="card progetto" style="box-shadow: 6px 6px 0 var(--testo)">
+          <div class="colonna" style="flex: 1 1 380px; gap: 16px">
+            <span class="tag">Progetto in corso</span>
+            <h2 style="font-size: 34px">{progetto.data.titolo}</h2>
+            <p>{progetto.data.descrizione}</p>
+            <div class="avanzamento" role="img" aria-label={`Avanzamento: ${fatte} puntate su ${progetto.data.puntatePreviste}`}>
+              {Array.from({ length: progetto.data.puntatePreviste }, (_, i) => <span class:list={{ fatto: i < fatte }}></span>)}
+            </div>
+            <span class="hand" style="font-size: 24px">puntata {fatte} di {progetto.data.puntatePreviste}{progetto.data.spesaTotale && ` — spesa finora: ${progetto.data.spesaTotale}`}</span>
+            <a class="btn primario" style="align-self: flex-start" href={`/progetti/${progetto.id}/`}>Segui il progetto</a>
+          </div>
+          {progetto.data.copertina
+            ? <img src={progetto.data.copertina} alt="" style="flex: 1 1 380px; border-radius: 8px; aspect-ratio: 4/3; object-fit: cover" />
+            : <div class="foto-vuota" style="flex: 1 1 380px; aspect-ratio: 4/3">foto del progetto in arrivo</div>}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <section class="sezione">
+    <div class="wrap">
+      <div class="scuro motore-box">
+        <span class="tag celeste">Il motore</span>
+        <h2 style="font-size: 40px">Come funziona <span style="color: var(--celeste)">il motore</span></h2>
+        <p class="lead" style="max-width: 720px">Un componente alla volta, dal pistone al cambio. Spiegato come in garage, ma con ogni dato controllato su fonti tecniche.</p>
+        <div style="display: flex; flex-wrap: wrap; gap: 10px">
+          {componenti.map((c) => <a class="chip" href="/motore/" style="background: transparent; color: #fff; border-color: #fff">{c}</a>)}
+        </div>
+        <a class="btn primario" style="align-self: flex-start" href="/motore/">Esplora il motore</a>
+      </div>
+    </div>
+  </section>
+
+  {listaBrand.length > 0 && (
+    <section class="sezione" style="padding-bottom: 80px">
+      <div class="wrap colonna" style="gap: 22px">
+        <div class="titolo-sez">
+          <h2>I <span class="hi">brand</span> di cui parlo</h2>
+          <span class="hand nota">clicca e trovi tutto quello che ho scritto</span>
+        </div>
+        <div style="display: flex; flex-wrap: wrap; gap: 12px">
+          {listaBrand.map((b) => <a class="chip" href={`/brand/${b.id}/`}>{b.data.nome}</a>)}
+          <a class="chip" href="/brand/" style="background: var(--testo); color: #fff">Tutti i brand →</a>
+        </div>
+      </div>
+    </section>
+  )}
+</Base>
+
+<style>
+  .eroe { padding: 64px 0; }
+  .eroe-in { display: flex; flex-wrap: wrap; gap: 48px; align-items: center; }
+  .eroe-testo { flex: 1 1 460px; display: flex; flex-direction: column; gap: 22px; align-items: flex-start; }
+  .eroe-testo h1 { font-size: clamp(38px, 6vw, 60px); }
+  .eroe-media { flex: 1 1 460px; }
+  .eroe-media img { width: 100%; aspect-ratio: 16/9; object-fit: cover; border: 3px solid #fff; border-radius: 10px; display: block; }
+  .lead { margin: 0; font-size: 18px; line-height: 1.6; color: #e6e6e6; max-width: 540px; }
+  .sezione { padding: 48px 0; }
+  .colonna { display: flex; flex-direction: column; gap: 28px; }
+  .titolo-sez { display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; }
+  .titolo-sez h2 { font-size: 36px; }
+  .nota { font-size: 26px; color: #555; }
+  .tutti { font-weight: 800; text-transform: uppercase; font-size: 14px; min-height: 44px; display: inline-flex; align-items: center; }
+  .rubriche { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 24px; }
+  .rubriche h3 { font-size: 21px; }
+  .progetto { padding: 36px; flex-direction: row; flex-wrap: wrap; gap: 36px; align-items: center; }
+  .progetto:hover { transform: none; }
+  .motore-box { border-radius: 14px; padding: 40px; display: flex; flex-direction: column; gap: 22px; }
+  @media (max-width: 640px) { .motore-box, .progetto { padding: 24px; } }
+</style>

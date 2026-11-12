@@ -1,0 +1,24 @@
+---
+import Base from '../layouts/Base.astro';
+import Scheda from './Scheda.astro';
+import type { CollectionEntry } from 'astro:content';
+interface Props {
+  titolo: string;
+  evidenza: string;
+  intro: string;
+  attivo?: string;
+  voci: CollectionEntry<'articoli' | 'puntate' | 'motore'>[];
+}
+const { titolo, evidenza, intro, attivo, voci } = Astro.props;
+---
+<Base titolo={`${titolo} ${evidenza}`} descrizione={intro} attivo={attivo}>
+  <div class="wrap" style="padding-top: 48px; padding-bottom: 80px; display: flex; flex-direction: column; gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 760px">
+      <h1 style="font-size: clamp(38px, 6vw, 56px)">{titolo} <span class="hi">{evidenza}</span></h1>
+      <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #444">{intro}</p>
+    </div>
+    {voci.length > 0
+      ? <div class="griglia">{voci.map((v) => <Scheda voce={v} />)}</div>
+      : <p class="hand" style="font-size: 28px">qui arrivano presto i primi articoli</p>}
+  </div>
+</Base>

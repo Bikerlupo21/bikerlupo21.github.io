@@ -1,0 +1,69 @@
+---
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import { brand, articoli, puntate, motore, info, fmtData } from '../../lib/dati';
+
+export async function getStaticPaths() {
+  const voci = [...(await articoli()), ...(await puntate()), ...(await motore())]
+    .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+  return (await brand()).map((b) => ({
+    params: { id: b.id },
+    // La scheda raccoglie da sola ogni contenuto etichettato con questo brand
+    props: { b, dove: voci.filter((v) => v.data.brand.includes(b.id)) },
+  }));
+}
+const { b, dove } = Astro.props;
+const { Content } = await render(b);
+const d = b.data;
+---
+<Base titolo={d.nome} descrizione={`Cosa penso di ${d.nome} e tutti gli articoli in cui ne parlo.`} attivo="brand">
+  <section class="scuro" style="padding: 56px 0">
+    <div class="wrap" style="display: flex; flex-wrap: wrap; gap: 40px; align-items: flex-start">
+      <div style="flex: 1 1 380px; display: flex; flex-direction: column; gap: 16px">
+        <nav aria-label="Percorso" class="muted" style="color: #bdbdbd"><a href="/brand/" style="color: #fff">Brand</a> / {d.nome}</nav>
+        <span class="tag celeste">Scheda brand · {d.categoria}</span>
+        <h1 class="stroke" style="font-size: clamp(38px, 6vw, 52px)">{d.nome}</h1>
+        <div class="intro"><Content /></div>
+        {d.giudizio && <span class="hand" style="font-size: 26px; color: var(--celeste)">{d.giudizio}</span>}
+        {d.sito && <a href={d.sito} rel="noopener" target="_blank" style="color: #fff; font-weight: 700">Sito ufficiale →</a>}
+      </div>
+      {(d.miPiace || d.nonMiPiace || d.provato.length > 0) && (
+        <div class="breve">
+          <h2 style="font-size: 20px; color: var(--nero)">In breve</h2>
+          <div style="display: flex; flex-wrap: wrap; gap: 20px">
+            {d.miPiace && <div class="voce"><span>Mi piace</span><b>{d.miPiace}</b></div>}
+            {d.nonMiPiace && <div class="voce"><span>Non mi piace</span><b>{d.nonMiPiace}</b></div>}
+          </div>
+          {d.provato.length > 0 && <div class="voce"><span>Cosa ho provato</span><b>{d.provato.join(', ')}</b></div>}
+        </div>
+      )}
+    </div>
+  </section>
+  <section style="padding: 48px 0 80px">
+    <div class="wrap" style="display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; flex-wrap: wrap; align-items: baseline; gap: 16px; margin-bottom: 8px">
+        <h2 style="font-size: 30px">Dove ne parlo</h2>
+        <span class="hand" style="font-size: 24px; color: #555">si aggiorna da sola ogni volta che etichetti un articolo con questo brand</span>
+      </div>
+      {dove.length === 0 && <p class="muted">Ancora nessun articolo.</p>}
+      {dove.map((v) => {
+        const { href, tag } = info(v);
+        return (
+          <a class="riga" href={href}>
+            <span style="display: flex; gap: 14px; align-items: center; flex-wrap: wrap"><span class="tag">{tag}</span><span style="font-weight: 800; font-size: 18px">{v.data.titolo}</span></span>
+            <span class="muted">{fmtData(v.data.data)} →</span>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+</Base>
+<style>
+  .intro :global(p) { margin: 0; font-size: 17px; line-height: 1.65; color: #e0e0e0; }
+  .breve { flex: 1 1 380px; background: #fff; color: var(--testo); border-radius: 12px; padding: 26px; display: flex; flex-direction: column; gap: 14px; }
+  .voce { flex: 1 1 140px; display: flex; flex-direction: column; gap: 6px; }
+  .voce span { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--grigio); }
+  .voce b { font-weight: 700; line-height: 1.5; }
+  .riga { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid var(--linea); text-decoration: none; min-height: 44px; }
+  .riga:hover { background: var(--celeste-velo); }
+</style>

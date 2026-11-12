@@ -1,0 +1,14 @@
+---
+import { getEntry } from 'astro:content';
+interface Props { brand: string[] }
+const lista = (await Promise.all(Astro.props.brand.map((id) => getEntry('brand', id)))).filter((b) => b !== undefined);
+---
+{lista.length > 0 && (
+  <div class="box">
+    <h2 style="font-size: 16px">Brand citati</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 10px">
+      {lista.map((b) => <a class="chip" href={`/brand/${b.id}/`}>{b.data.nome}</a>)}
+    </div>
+    <span class="hand" style="font-size: 20px; color: #555">trovi tutto quello che ho scritto su ognuno nella sua scheda</span>
+  </div>
+)}

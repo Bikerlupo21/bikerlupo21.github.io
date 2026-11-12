@@ -1,0 +1,49 @@
+---
+// Video YouTube (versione senza cookie) + capitoli cliccabili che fanno saltare il video
+interface Props { id: string; titolo: string; capitoli?: { tempo: string; titolo: string }[] }
+const { id, titolo, capitoli = [] } = Astro.props;
+const secondi = (t: string) => t.split(':').map(Number).reduce((acc, n) => acc * 60 + n, 0);
+---
+<div class="video-blocco">
+  <div class="video">
+    <iframe
+      data-yt
+      src={`https://www.youtube-nocookie.com/embed/${id}`}
+      title={titolo}
+      loading="lazy"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen></iframe>
+  </div>
+  {capitoli.length > 0 && (
+    <nav class="capitoli box" aria-label="Capitoli del video">
+      <h2>Capitoli del video</h2>
+      {capitoli.map((c) => (
+        <a href={`https://www.youtube.com/watch?v=${id}&t=${secondi(c.tempo)}s`} data-start={secondi(c.tempo)}>
+          <b>{c.tempo}</b> {c.titolo}
+        </a>
+      ))}
+    </nav>
+  )}
+</div>
+<script is:inline data-id={id}>
+  document.querySelectorAll('[data-start]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const f = a.closest('.video-blocco')?.querySelector('[data-yt]');
+      if (!f) return;
+      e.preventDefault();
+      const base = f.src.split('?')[0];
+      f.src = `${base}?start=${a.dataset.start}&autoplay=1`;
+      f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  });
+</script>
+<style>
+  .video-blocco { display: flex; flex-wrap: wrap; gap: 28px; align-items: flex-start; }
+  .video { flex: 999 1 560px; min-width: 0; aspect-ratio: 16 / 9; border: 3px solid var(--nero); border-radius: 10px; overflow: hidden; background: #000; }
+  .video iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .capitoli { flex: 1 1 280px; gap: 2px; }
+  .capitoli h2 { font-size: 18px; margin-bottom: 8px; }
+  .capitoli a { display: flex; gap: 12px; align-items: center; min-height: 44px; text-decoration: none; font-weight: 600; border-bottom: 1px solid var(--linea); }
+  .capitoli a:hover { background: var(--celeste-velo); }
+  .capitoli b { font-weight: 900; font-variant-numeric: tabular-nums; background: var(--nero); color: #fff; padding: 3px 8px; border-radius: 4px; font-size: 13px; }
+</style>

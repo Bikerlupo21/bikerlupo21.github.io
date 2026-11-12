@@ -1,0 +1,26 @@
+---
+// Card per qualsiasi contenuto (articolo, puntata, motore)
+import type { CollectionEntry } from 'astro:content';
+import { fmtData, info } from '../lib/dati';
+interface Props { voce: CollectionEntry<'articoli' | 'puntate' | 'motore'> }
+const { voce } = Astro.props;
+const { href, tag } = info(voce);
+const { titolo, descrizione, data, copertina } = voce.data;
+---
+<a class="card scheda" href={href}>
+  {copertina
+    ? <img src={copertina} alt="" loading="lazy" class="cop" />
+    : <div class="foto-vuota cop" aria-hidden="true">foto in arrivo</div>}
+  <div class="in">
+    <span class:list={['tag', { celeste: voce.collection === 'motore' }]}>{tag}</span>
+    <h3>{titolo}</h3>
+    <p>{descrizione}</p>
+    <span class="muted"><time datetime={data.toISOString()}>{fmtData(data)}</time></span>
+  </div>
+</a>
+<style>
+  .scheda { padding: 0; overflow: hidden; }
+  .cop { aspect-ratio: 16 / 10; width: 100%; object-fit: cover; border: none; border-bottom: 3px solid var(--testo); border-radius: 0; }
+  .in { padding: 0 18px 20px; display: flex; flex-direction: column; gap: 10px; }
+  h3 { font-size: 21px; }
+</style>

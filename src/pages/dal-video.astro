@@ -1,0 +1,6 @@
+---
+import Elenco from '../components/Elenco.astro';
+import { articoli } from '../lib/dati';
+const voci = (await articoli()).filter((a) => a.data.rubrica === 'dal-video');
+---
+<Elenco titolo="Dal" evidenza="video" attivo="dal-video" intro="Ogni video lungo ha il suo articolo: la stessa storia, per iscritto, con pezzi, costi e link." voci={voci} />

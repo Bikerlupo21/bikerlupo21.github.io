@@ -1,0 +1,7 @@
+---
+import Elenco from '../../components/Elenco.astro';
+import { articoli, puntate, motore } from '../../lib/dati';
+const voci = [...(await articoli()), ...(await puntate()), ...(await motore())]
+  .sort((a, b) => b.data.data.valueOf() - a.data.data.valueOf());
+---
+<Elenco titolo="Tutti gli" evidenza="articoli" intro="Tutto quello che ho scritto, dal più recente." voci={voci} />

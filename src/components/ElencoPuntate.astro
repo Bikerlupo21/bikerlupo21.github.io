@@ -1,0 +1,25 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { progetto: CollectionEntry<'progetti'>; puntate: CollectionEntry<'puntate'>[]; corrente?: string }
+const { progetto, puntate, corrente } = Astro.props;
+const restanti = Math.max(0, progetto.data.puntatePreviste - puntate.length);
+---
+<nav class="box ep" aria-label="Puntate del progetto">
+  <h2 style="font-size: 16px; padding: 4px 8px 6px">Le puntate</h2>
+  {puntate.map((p) => (
+    <a href={`/progetti/${progetto.id}/${p.id}/`} aria-current={p.id === corrente ? 'page' : undefined}>
+      <span class="n">{p.data.numero}</span>{p.data.titolo}
+    </a>
+  ))}
+  {Array.from({ length: restanti }, (_, i) => (
+    <span class="prossima"><span class="n" style="border-style: dashed">{puntate.length + i + 1}</span>in arrivo</span>
+  ))}
+</nav>
+<style>
+  .ep { gap: 2px; padding: 14px; }
+  .ep a, .prossima { display: flex; gap: 12px; align-items: center; min-height: 48px; padding: 0 8px; text-decoration: none; font-weight: 700; border-radius: 8px; }
+  .ep a:hover { background: var(--celeste-velo); }
+  .ep a[aria-current='page'] { background: var(--celeste); }
+  .prossima { color: var(--grigio); }
+  .n { width: 30px; height: 30px; border-radius: 50%; border: 2px solid var(--testo); display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 13px; flex: none; background: #fff; }
+</style>

@@ -1,0 +1,21 @@
+---
+import type { CollectionEntry } from 'astro:content';
+interface Props { progetto: CollectionEntry<'progetti'>; fatte: number; corrente?: number }
+const { progetto, fatte, corrente } = Astro.props;
+const d = progetto.data;
+---
+<section class="scuro" style="padding: 48px 0">
+  <div class="wrap" style="display: flex; flex-direction: column; gap: 18px">
+    <span class="tag celeste">Progetto · {d.stato === 'in-corso' ? 'in corso' : 'concluso'}</span>
+    <h1 class="stroke" style="font-size: clamp(36px, 6vw, 54px)"><a href={`/progetti/${progetto.id}/`} style="color: inherit; text-decoration: none">{d.titolo}</a></h1>
+    <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #e0e0e0; max-width: 680px">{d.moto}: {d.descrizione}</p>
+    <div class="avanzamento" role="img" aria-label={`Avanzamento: ${fatte} puntate su ${d.puntatePreviste}`}>
+      {Array.from({ length: d.puntatePreviste }, (_, i) => (
+        <span class:list={{ fatto: i < fatte }} style={corrente === i + 1 ? 'outline: 3px solid #fff; outline-offset: 2px' : undefined}></span>
+      ))}
+    </div>
+    <span class="hand" style="font-size: 26px; color: var(--celeste)">
+      {corrente ? `sei alla puntata ${corrente} di ${d.puntatePreviste}` : `${fatte} puntate su ${d.puntatePreviste}`}{d.spesaTotale && ` — spesa totale: ${d.spesaTotale}`}
+    </span>
+  </div>
+</section>

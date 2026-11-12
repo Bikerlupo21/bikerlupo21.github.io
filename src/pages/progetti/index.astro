@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import { progetti, puntate } from '../../lib/dati';
+const lista = await progetti();
+const tutte = await puntate();
+---
+<Base titolo="Progetti" descrizione="I lavori in garage raccontati a puntate, con tempi, costi e ricambi." attivo="progetti">
+  <div class="wrap" style="padding-top: 48px; padding-bottom: 80px; display: flex; flex-direction: column; gap: 32px">
+    <div style="display: flex; flex-direction: column; gap: 14px; max-width: 760px">
+      <h1 style="font-size: clamp(38px, 6vw, 56px)">I <span class="hi">progetti</span></h1>
+      <p style="margin: 0; font-size: 18px; line-height: 1.6; color: #444">I lavori in garage raccontati passo dopo passo: ogni puntata è una fase, con tempi, costi e ricambi.</p>
+    </div>
+    {lista.length === 0 && <p class="hand" style="font-size: 28px">il primo progetto arriva presto</p>}
+    <div class="griglia">
+      {lista.map((p) => {
+        const fatte = tutte.filter((x) => x.data.progetto === p.id).length;
+        return (
+          <a class="card" href={`/progetti/${p.id}/`}>
+            {p.data.copertina ? <img src={p.data.copertina} alt="" style="aspect-ratio: 16/10; object-fit: cover; border-radius: 6px" /> : <div class="foto-vuota" style="aspect-ratio: 16/10">foto in arrivo</div>}
+            <span class:list={['tag', { celeste: p.data.stato === 'in-corso' }]}>{p.data.stato === 'in-corso' ? 'In corso' : 'Concluso'}</span>
+            <h2 style="font-size: 24px">{p.data.titolo}</h2>
+            <p>{p.data.descrizione}</p>
+            <div class="avanzamento" aria-hidden="true">{Array.from({ length: p.data.puntatePreviste }, (_, i) => <span class:list={{ fatto: i < fatte }}></span>)}</div>
+            <span class="muted">{fatte} puntate su {p.data.puntatePreviste}</span>
+          </a>
+        );
+      })}
+    </div>
+  </div>
+</Base>

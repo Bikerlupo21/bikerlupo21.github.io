@@ -1,0 +1,6 @@
+---
+import Elenco from '../components/Elenco.astro';
+import { articoli } from '../lib/dati';
+const voci = (await articoli()).filter((a) => a.data.rubrica === 'provato-da-me');
+---
+<Elenco titolo="Provato" evidenza="da me" attivo="provato-da-me" intro="Accessori, abbigliamento e ricambi usati sul serio, anche senza un video: pro, contro e il mio giudizio." voci={voci} />

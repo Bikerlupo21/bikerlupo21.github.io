@@ -1,0 +1,29 @@
+---
+interface Props {
+  titolo?: string;
+  pezzi: { cosa: string; brand?: string; costo?: string; link?: string }[];
+  totale?: string;
+}
+const { titolo = 'Pezzi, costi e link', pezzi, totale } = Astro.props;
+---
+{pezzi.length > 0 && (
+  <section style="display: flex; flex-direction: column; gap: 14px">
+    <h2 style="font-size: 26px">{titolo}</h2>
+    <div class="tabella">
+      <table>
+        <thead><tr><th scope="col">Cosa</th><th scope="col">Brand</th><th scope="col">Costo</th><th scope="col">Link</th></tr></thead>
+        <tbody>
+          {pezzi.map((p) => (
+            <tr>
+              <td>{p.cosa}</td>
+              <td>{p.brand ?? '—'}</td>
+              <td>{p.costo ?? '—'}</td>
+              <td>{p.link ? <a href={p.link} rel="noopener sponsored" target="_blank">Vedi</a> : '—'}</td>
+            </tr>
+          ))}
+          {totale && <tr><td style="font-weight: 900">Totale</td><td></td><td style="font-weight: 900">{totale}</td><td></td></tr>}
+        </tbody>
+      </table>
+    </div>
+  </section>
+)}
