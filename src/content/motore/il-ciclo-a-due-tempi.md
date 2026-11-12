@@ -5,7 +5,7 @@ data: 2026-11-12
 gruppo: basi
 ordine: 2
 verificatoIl: 2026-11-12
-bozza: true
+bozza: false
 copertina: /img/motore/due-tempi-spinte.png
 inBreve:
   - "Le stesse operazioni del quattro tempi (aspirazione, compressione, espansione, scarico) in due sole corse del pistone: un giro dell'albero."
